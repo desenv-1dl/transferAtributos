@@ -13,12 +13,13 @@ from multiLayerSelect import MultiLayerSelection
 from multiLayerSelectRect import MultiLayerSelectRect
 from interface_copyPaste import CopyPaste
 
+LayersDestinations = []
 class Main:
     def __init__(self, iface):
         self.iface = iface
         self.canvas = iface.mapCanvas()
         self.tool1 = MultiLayerSelection(self.iface.mapCanvas(), self.iface)
-    
+                
     def initGui(self):
         self.action1 = QAction(QIcon(icon1), u"selecionar feições", self.iface.mainWindow())
         self.action2 = QAction(QIcon(icon2), u"Transfer-Atributos", self.iface.mainWindow())
@@ -36,15 +37,16 @@ class Main:
             self.canvas.unsetMapTool(self.tool1)
             self.canvas.unsetCursor()
             self.removeSelecoes()
-                          
+                              
     def selectMulti(self):
         self.iface.mapCanvas().setMapTool(self.tool1)
-    
+           
     def copyPaste(self):
         if (self.iface.activeLayer()) and (len(self.iface.activeLayer().selectedFeatures()) == 1):
             layer = self.iface.activeLayer().selectedFeatures()[0]
             dialog = QtGui.QDialog(self.iface.mainWindow())
             self.d = CopyPaste(self.iface, layer, dialog)
+            self.tool1.finished.connect(self.d.setSelectedLayers)
             self.d.show()
         else:
             self.iface.messageBar().pushMessage(u"Atenção", u"Selecione apenas uma feição",

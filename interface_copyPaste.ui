@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>348</width>
-    <height>592</height>
+    <height>569</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,18 +18,38 @@
     <widget class="QListWidget" name="listField"/>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout">
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
-      <widget class="QPushButton" name="pasteButton">
+      <widget class="QPushButton" name="removeButton">
        <property name="text">
-        <string>Colar</string>
+        <string>Remover todos</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="selectButton">
+       <property name="text">
+        <string>Selecionar todos</string>
        </property>
       </widget>
      </item>
     </layout>
    </item>
+   <item>
+    <widget class="QPushButton" name="pasteButton">
+     <property name="text">
+      <string>Colar</string>
+     </property>
+    </widget>
+   </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>pasteButton</tabstop>
+  <tabstop>listField</tabstop>
+  <tabstop>removeButton</tabstop>
+  <tabstop>selectButton</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

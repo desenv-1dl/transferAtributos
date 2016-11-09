@@ -19,8 +19,8 @@ class CopyPaste(QtGui.QDialog, FORM_CLASS):
         super(CopyPaste, self).__init__(parent)
         self.iface = iface
         self.canvas = iface.mapCanvas()
-        self.tool2 = MultiLayerSelectRect(self.iface.mapCanvas(), self.iface)
         self.setupUi(self)
+        self.SelectedLayers = None
         self.layerInitial = {}
         self.setDataLayer(layer)
         self.addItems()
@@ -45,19 +45,26 @@ class CopyPaste(QtGui.QDialog, FORM_CLASS):
             if self.listField.item(i).checkState():
                 fieldsInital.append(self.listField.item(i).text())
         return fieldsInital
+    
+    def getSelectedLayers(self):
+        return self.SelectedLayers
+    
+    def setSelectedLayers(self, layers):
+        self.SelectedLayers = layers
         
-    def listOfSelection(self, layersSelected):
-        layers = QgsMapLayerRegistry.instance().mapLayers()    
-        grupo={}
-        for x in range(len(layers)):
-            if layers.keys()[x][:-17] in layersSelected:
-                grupo[layers.keys()[x][:-17]]=layers.get(layers.keys()[x]) 
-        for layer in grupo:
-            self.iface.setActiveLayer(grupo[layer])
-            ids = self.iface.activeLayer().selectedFeaturesIds()
-            self.attributeLayer(ids)
-        self.removeSelecoes()
-        
+    def startCopyPaste(self):
+        selectedLayers = self.getSelectedLayers()
+        if selectedLayers:
+            layers = QgsMapLayerRegistry.instance().mapLayers()    
+            grupo={}
+            for x in range(len(layers)):
+                if layers.keys()[x][:-17] in selectedLayers:
+                    grupo[layers.keys()[x][:-17]]=layers.get(layers.keys()[x]) 
+            for layer in grupo:
+                self.iface.setActiveLayer(grupo[layer])
+                ids = self.iface.activeLayer().selectedFeaturesIds()
+                self.attributeLayer(ids)
+            self.removeSelecoes()
         
     def attributeLayer(self, ids):
         fields = self.getFieldsToCopy()
@@ -69,9 +76,18 @@ class CopyPaste(QtGui.QDialog, FORM_CLASS):
         
     @pyqtSlot(bool)    
     def on_pasteButton_clicked(self):
-        self.tool2.finishedSelection.connect(self.listOfSelection) 
-        self.iface.mapCanvas().setMapTool(self.tool2)
+        self.startCopyPaste()
         
+    @pyqtSlot(bool)    
+    def on_removeButton_clicked(self):
+        for i in range(self.listField.count()):
+            self.listField.item(i).setCheckState(QtCore.Qt.Unchecked)
+    
+    @pyqtSlot(bool)    
+    def on_selectButton_clicked(self):
+        for i in range(self.listField.count()):
+            self.listField.item(i).setCheckState(QtCore.Qt.Checked)
+                
     def removeSelecoes(self):
         for i in range(len(self.canvas.layers())):
             try:
@@ -80,7 +96,6 @@ class CopyPaste(QtGui.QDialog, FORM_CLASS):
                 pass
             
     def closeEvent(self, e):
-        self.canvas.unsetMapTool(self.tool2)
         self.canvas.unsetCursor()
         self.removeSelecoes()
             
