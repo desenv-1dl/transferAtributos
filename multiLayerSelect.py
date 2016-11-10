@@ -54,35 +54,37 @@ class MultiLayerSelection(QgsMapTool):
 					self.setSelectionsLayers(layer.name())
 					self.iface.setActiveLayer(grupo.get(layer.name()))
 					self.iface.activeLayer().startEditing()
+				else:
+					layer.removeSelection()					
 		selectionsLayers = self.getSelectionsLayers()
 		if not self.free:
-			self.hasMoreThanOneSelection(selectionsLayers)
+			self.setOnlyOneSelection()
 		self.finished.emit(selectionsLayers)
 			
 					
-	def hasMoreThanOneSelection(self, selections):
-		layer2 = QgsMapLayerRegistry.instance().mapLayers()	
-		grupo={}
-		for x in range(len(layer2)):
-			if layer2.keys()[x][:-17] in selections:
-				grupo[layer2.get(layer2.keys()[x]).geometryType()]=layer2.get(layer2.keys()[x])
-		print grupo				
-		if 0 in grupo:
-			if not (len(grupo[0].selectedFeatures()) == 1):
-				grupo[0].selectedFeatures()
-			if 1 in grupo:
-				grupo[1].removeSelection()
-			if 2 in grupo:
-				grupo[2].removeSelection()	
-		elif 1 in grupo:
-			if not (len(grupo[1].selectedFeatures()) == 1):
-				grupo[1].selectedFeatures()
-			if 2 in grupo:
-				grupo[2].removeSelection()						
-		elif 2 in grupo:
-			if not (len(grupo[2].selectedFeatures()) == 1):
-				grupo[2].removeSelection()			
-                       
+	def setOnlyOneSelection(self):
+		selections = self.getSelectionsLayers()
+		layers = QgsMapLayerRegistry.instance().mapLayers()	
+		table = []
+		for x in range(len(layers)):
+			if layers.keys()[x][:-17] in selections:
+				table.append([layers.get(layers.keys()[x]).geometryType(), layers.get(layers.keys()[x])])
+		table.sort()
+		geom = None
+		for line in table:
+			if line[0] == 0:
+				geom = line[1]
+				break
+			elif line[0] == 1:
+				geom = line[1]
+				break
+			else: 
+				geom = line[1]
+				break
+		for line in table:
+			if not (line[1] == geom):
+				line[1].removeSelection()
+	                   
 	def deactivate(self):
 		if self is not None:
 			QgsMapTool.deactivate(self)
